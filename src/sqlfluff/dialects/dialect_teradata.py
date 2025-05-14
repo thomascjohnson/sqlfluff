@@ -169,6 +169,17 @@ teradata_dialect.add(
 )
 
 
+class SampleClauseSegment(BaseSegment):
+    """Sample clause.
+
+    https://docs.teradata.com/r/Enterprise_IntelliFlex_VMware/SQL-Data-Manipulation-Language/SELECT-Statements/SAMPLE-Clause/SAMPLE-Clause-Syntax
+
+    """
+
+    type = "sample_clause"
+    match_grammer = Sequence("SAMPLE", Ref("NumericLiteralSegment"))
+
+
 class BteqLabelStatementSegment(BaseSegment):
     """BTEQ label.
 
@@ -522,7 +533,14 @@ class TeradataCastSegment(BaseSegment):
     """
 
     type = "cast_expression"
-    match_grammar = AnyNumberOf(Bracketed(Ref("DatatypeSegment")), optional=True)
+    match_grammar = AnyNumberOf(
+        Bracketed(
+            AnyNumberOf(
+                Sequence("FORMAT", Ref("QuotedLiteralSegment")), Ref("DatatypeSegment")
+            )
+        ),
+        optional=True,
+    )
 
 
 class ExpressionSegment(BaseSegment):

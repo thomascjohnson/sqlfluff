@@ -107,6 +107,7 @@ teradata_dialect.sets("unreserved_keywords").update(
         "UPPERCASE",
         "SET",
         "WIDTH",
+        "TITLEDASHES",
     ]
 )
 
@@ -172,6 +173,7 @@ class BteqKeyWordSegment(BaseSegment):
     LOGOFF - Logs off from database and terminates all sessions.
     IMPORT - Specifies the input file path.
     EXPORT - Specifies the output file path and initiates the export.
+
     """
 
     type = "bteq_key_word_segment"
@@ -194,6 +196,7 @@ class BteqKeyWordSegment(BaseSegment):
             "ACTIVITYCOUNT",
             "SET",
             "WIDTH",
+            "TITLEDASHES",
         ),
         Ref("LiteralGrammar", optional=True),
     )

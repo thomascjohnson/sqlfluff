@@ -105,6 +105,8 @@ teradata_dialect.sets("unreserved_keywords").update(
         "THRESHOLD",
         "UC",
         "UPPERCASE",
+        "SET",
+        "WIDTH",
     ]
 )
 
@@ -190,6 +192,8 @@ class BteqKeyWordSegment(BaseSegment):
             "RUN",
             "QUIT",
             "ACTIVITYCOUNT",
+            "SET",
+            "WIDTH",
         ),
         Ref("LiteralGrammar", optional=True),
     )
@@ -450,7 +454,7 @@ class TeradataCastSegment(BaseSegment):
     """
 
     type = "cast_expression"
-    match_grammar = Bracketed(Ref("DatatypeSegment"))
+    match_grammar = AnyNumberOf(Bracketed(Ref("DatatypeSegment")), optional=True)
 
 
 class ExpressionSegment(BaseSegment):
@@ -802,40 +806,43 @@ class LockingClauseSegment(BaseSegment):
     """
 
     type = "locking_clause"
-    match_grammar = Sequence(
-        OneOf(
-            "LOCKING",
-            "LOCK",
+    match_grammar = AnyNumberOf(
+        Sequence(
+            OneOf(
+                "LOCKING",
+                "LOCK",
+            ),
+            OneOf(
+                "ROW",
+                Sequence("TABLE", Ref("ObjectReferenceSegment", optional=True)),
+                Sequence("VIEW", Ref("ObjectReferenceSegment", optional=True)),
+                Sequence("DATABASE", Ref("ObjectReferenceSegment", optional=True)),
+            ),
+            OneOf(
+                "FOR",
+                "IN",
+            ),
+            OneOf(
+                "ACCESS",
+                "WRITE",
+                "EXCLUSIVE",
+                "EXCL",
+                Sequence("READ", Sequence("OVERRIDE", optional=True)),
+                "SHARE",
+                "CHECKSUM",
+                Sequence("LOAD", "COMMITTED"),
+            ),
+            Sequence("MODE", optional=True),
+            Sequence("NOWAIT", optional=True),
         ),
-        OneOf(
-            "ROW",
-            Sequence("TABLE", Ref("ObjectReferenceSegment", optional=True)),
-            Sequence("VIEW", Ref("ObjectReferenceSegment", optional=True)),
-            Sequence("DATABASE", Ref("ObjectReferenceSegment", optional=True)),
-        ),
-        OneOf(
-            "FOR",
-            "IN",
-        ),
-        OneOf(
-            "ACCESS",
-            "WRITE",
-            "EXCLUSIVE",
-            "EXCL",
-            Sequence("READ", Sequence("OVERRIDE", optional=True)),
-            "SHARE",
-            "CHECKSUM",
-            Sequence("LOAD", "COMMITTED"),
-        ),
-        Sequence("MODE", optional=True),
-        Sequence("NOWAIT", optional=True),
+        optional=True,
     )
 
 
 class SelectStatementSegment(ansi.SelectStatementSegment):
     """A `SELECT` statement.
 
-    https://dev.mysql.com/doc/refman/5.7/en/select.html
+    https://docs.teradata.com/r/Enterprise_IntelliFlex_VMware/Database-Introduction/SQL/SELECT-Statement/SELECT-Statement-and-Set-Operators
     """
 
     match_grammar_with_qualify_clause = ansi.SelectStatementSegment.match_grammar.copy(

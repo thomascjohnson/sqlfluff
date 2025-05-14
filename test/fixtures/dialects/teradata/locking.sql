@@ -12,3 +12,7 @@ WITH cte AS (
     SELECT a FROM v
 )
 SELECT a FROM cte;
+
+LOCKING TABLE table_name FOR READ
+LOCK ROW FOR WRITE
+SELECT a FROM table_name;

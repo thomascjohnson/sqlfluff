@@ -3,7 +3,7 @@
 # computed by SQLFluff when running the tests. Please run
 # `python test/generate_parse_fixture_yml.py`  to generate them after adding or
 # altering SQL files.
-_hash: 8afc58b56c9abaa21d177d1798009abc371fb9c8332a53136c6f48736ac88407
+_hash: ea8161ea7dd95f4fb13a6a3e01b775172f69e1e6d31de9d1b79d4b337d439f42
 file:
 - statement:
     select_statement:
@@ -160,12 +160,22 @@ file:
           expression:
             quoted_literal: "'9999-12-31'"
             cast_expression:
-              bracketed:
+            - bracketed:
                 start_bracket: (
                 data_type:
                   data_type_identifier: DATE
                   keyword: FORMAT
                   quoted_literal: "'YYYY-MM-DD'"
+                end_bracket: )
+            - bracketed:
+                start_bracket: (
+                data_type:
+                  data_type_identifier: CHAR
+                  bracketed_arguments:
+                    bracketed:
+                      start_bracket: (
+                      numeric_literal: '10'
+                      end_bracket: )
                 end_bracket: )
       - comma: ','
       - select_clause_element:

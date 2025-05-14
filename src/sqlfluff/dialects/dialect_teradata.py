@@ -23,6 +23,7 @@ from sqlfluff.core.parser import (
     IdentifierSegment,
     ImplicitIndent,
     Indent,
+    KeywordSegment,
     Matchable,
     OneOf,
     OptionallyBracketed,
@@ -147,6 +148,11 @@ teradata_dialect.replace(
     # match ANSI's naked identifier casefold, teradata is case-insensitive.
     QuotedIdentifierSegment=TypedParser(
         "double_quote", IdentifierSegment, type="quoted_identifier", casefold=str.upper
+    ),
+    ArithmeticBinaryOperatorGrammar=ansi_dialect.get_grammar(
+        "ArithmeticBinaryOperatorGrammar"
+    ).copy(
+        insert=[StringParser("MOD", KeywordSegment, type="binary_operator")],
     ),
 )
 

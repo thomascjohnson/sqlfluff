@@ -536,7 +536,13 @@ class TeradataCastSegment(BaseSegment):
     match_grammar = AnyNumberOf(
         Bracketed(
             AnyNumberOf(
-                Sequence("FORMAT", Ref("QuotedLiteralSegment")), Ref("DatatypeSegment")
+                Sequence("FORMAT", Ref("QuotedLiteralSegment")),
+                Ref("DatatypeSegment"),
+                Sequence(
+                    Ref("DatatypeSegment"),
+                    Ref("CommaSegment"),
+                    Sequence("FORMAT", Ref("QuotedLiteralSegment")),
+                ),
             )
         ),
         optional=True,

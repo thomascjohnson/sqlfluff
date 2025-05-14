@@ -3,17 +3,17 @@
 # computed by SQLFluff when running the tests. Please run
 # `python test/generate_parse_fixture_yml.py`  to generate them after adding or
 # altering SQL files.
-_hash: 667a34bda97a809a35dbb2ff4215e321e0a75e0ac5f3ab6ac5e3809782baf2d2
+_hash: c5a1b57c652bbafde28a00c911eddde12011cb72de6122cbdb7cfd856108b29e
 file:
 - statement:
+    locking_clause:
+    - keyword: LOCKING
+    - keyword: DATABASE
+    - object_reference:
+        naked_identifier: database_name
+    - keyword: FOR
+    - keyword: ACCESS
     select_statement:
-      locking_clause:
-      - keyword: LOCKING
-      - keyword: DATABASE
-      - object_reference:
-          naked_identifier: database_name
-      - keyword: FOR
-      - keyword: ACCESS
       select_clause:
         keyword: SELECT
         select_clause_element:
@@ -30,14 +30,14 @@ file:
               - naked_identifier: mytable
 - statement_terminator: ;
 - statement:
+    locking_clause:
+    - keyword: LOCKING
+    - keyword: TABLE
+    - object_reference:
+        naked_identifier: table_name
+    - keyword: FOR
+    - keyword: READ
     select_statement:
-      locking_clause:
-      - keyword: LOCKING
-      - keyword: TABLE
-      - object_reference:
-          naked_identifier: table_name
-      - keyword: FOR
-      - keyword: READ
       select_clause:
         keyword: SELECT
         select_clause_element:
@@ -52,12 +52,12 @@ file:
                 naked_identifier: table_name
 - statement_terminator: ;
 - statement:
+    locking_clause:
+    - keyword: LOCK
+    - keyword: ROW
+    - keyword: FOR
+    - keyword: WRITE
     select_statement:
-      locking_clause:
-      - keyword: LOCK
-      - keyword: ROW
-      - keyword: FOR
-      - keyword: WRITE
       select_clause:
         keyword: SELECT
         select_clause_element:
@@ -72,14 +72,14 @@ file:
                 naked_identifier: table_name
 - statement_terminator: ;
 - statement:
+    locking_clause:
+    - keyword: LOCKING
+    - keyword: VIEW
+    - object_reference:
+        naked_identifier: v
+    - keyword: FOR
+    - keyword: EXCLUSIVE
     with_compound_statement:
-      locking_clause:
-      - keyword: LOCKING
-      - keyword: VIEW
-      - object_reference:
-          naked_identifier: v
-      - keyword: FOR
-      - keyword: EXCLUSIVE
       keyword: WITH
       common_table_expression:
         naked_identifier: cte
@@ -115,18 +115,18 @@ file:
                   naked_identifier: cte
 - statement_terminator: ;
 - statement:
+    locking_clause:
+    - keyword: LOCKING
+    - keyword: TABLE
+    - object_reference:
+        naked_identifier: table_name
+    - keyword: FOR
+    - keyword: READ
+    - keyword: LOCK
+    - keyword: ROW
+    - keyword: FOR
+    - keyword: WRITE
     select_statement:
-      locking_clause:
-      - keyword: LOCKING
-      - keyword: TABLE
-      - object_reference:
-          naked_identifier: table_name
-      - keyword: FOR
-      - keyword: READ
-      - keyword: LOCK
-      - keyword: ROW
-      - keyword: FOR
-      - keyword: WRITE
       select_clause:
         keyword: SELECT
         select_clause_element:
@@ -139,4 +139,28 @@ file:
             table_expression:
               table_reference:
                 naked_identifier: table_name
+- statement_terminator: ;
+- statement:
+    locking_clause:
+    - keyword: LOCK
+    - keyword: TABLE
+    - object_reference:
+        naked_identifier: table_name
+    - keyword: FOR
+    - keyword: READ
+    - keyword: LOCK
+    - keyword: TABLE
+    - object_reference:
+        naked_identifier: table_name
+    - keyword: FOR
+    - keyword: WRITE
+    delete_statement:
+      keyword: DELETE
+      from_clause:
+        keyword: FROM
+        from_expression:
+          from_expression_element:
+            table_expression:
+              table_reference:
+                naked_identifier: abc
 - statement_terminator: ;

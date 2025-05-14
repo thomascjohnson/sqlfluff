@@ -119,7 +119,7 @@ teradata_dialect.sets("unreserved_keywords").update(
 teradata_dialect.sets("unreserved_keywords").update(UNRESERVED_KEYWORDS)
 
 teradata_dialect.sets("reserved_keywords").update(
-    ["LOCKING", "UNION", "REPLACE", "TIMESTAMP"]
+    ["LOCK", "LOCKING", "UNION", "REPLACE", "TIMESTAMP"]
 )
 
 teradata_dialect.sets("bare_functions").update(["DATE"])
@@ -865,17 +865,20 @@ class StatementSegment(ansi.StatementSegment):
 
     type = "statement"
 
-    match_grammar = ansi.StatementSegment.match_grammar.copy(
-        insert=[
-            Ref("TdCollectStatisticsStatementSegment"),
-            Ref("BteqStatementSegment"),
-            Ref("TdRenameStatementSegment"),
-            Ref("QualifyClauseSegment"),
-            Ref("TdCommentStatementSegment"),
-            Ref("DatabaseStatementSegment"),
-            Ref("SetSessionStatementSegment"),
-            Ref("SetQueryBandStatementSegment"),
-        ],
+    match_grammar = Sequence(
+        Ref("LockingClauseSegment", optional=True),
+        ansi.StatementSegment.match_grammar.copy(
+            insert=[
+                Ref("TdCollectStatisticsStatementSegment"),
+                Ref("BteqStatementSegment"),
+                Ref("TdRenameStatementSegment"),
+                Ref("QualifyClauseSegment"),
+                Ref("TdCommentStatementSegment"),
+                Ref("DatabaseStatementSegment"),
+                Ref("SetSessionStatementSegment"),
+                Ref("SetQueryBandStatementSegment"),
+            ],
+        ),
     )
 
 
@@ -931,20 +934,31 @@ class LockingClauseSegment(BaseSegment):
     )
 
 
+class DeleteStatementSegment(ansi.DeleteStatementSegment):
+    """A `DELETE` statement.
+
+    DEL[ETE] FROM <table name> [ WHERE <search condition> ]
+    """
+
+    type = "delete_statement"
+    # match grammar. This one makes sense in the context of knowing that it's
+    # definitely a statement, we just don't know what type yet.
+    match_grammar: Matchable = Sequence(
+        OneOf("DELETE", "DEL"),
+        Ref("FromClauseSegment"),
+        Ref("WhereClauseSegment", optional=True),
+    )
+
+
 class SelectStatementSegment(ansi.SelectStatementSegment):
     """A `SELECT` statement.
 
     https://docs.teradata.com/r/Enterprise_IntelliFlex_VMware/Database-Introduction/SQL/SELECT-Statement/SELECT-Statement-and-Set-Operators
     """
 
-    match_grammar_with_qualify_clause = ansi.SelectStatementSegment.match_grammar.copy(
+    match_grammar = ansi.SelectStatementSegment.match_grammar.copy(
         insert=[Ref("QualifyClauseSegment", optional=True)],
         before=Ref("OrderByClauseSegment", optional=True),
-    )
-
-    match_grammar = match_grammar_with_qualify_clause.copy(
-        insert=[Ref("LockingClauseSegment", optional=True)],
-        before=Ref("SelectClauseSegment"),
     )
 
 
@@ -954,9 +968,7 @@ class WithCompoundStatementSegment(ansi.WithCompoundStatementSegment):
     `WITH tab (col1,col2) AS (SELECT a,b FROM x)`
     """
 
-    match_grammar = ansi.WithCompoundStatementSegment.match_grammar.copy(
-        insert=[Ref("LockingClauseSegment", optional=True)], at=0
-    )
+    match_grammar = ansi.WithCompoundStatementSegment.match_grammar
 
 
 class UnorderedSelectStatementSegment(ansi.UnorderedSelectStatementSegment):
@@ -990,22 +1002,6 @@ class SelectClauseSegment(ansi.SelectClauseSegment):
             Ref("SetOperatorSegment"),
         ],
         replace_terminators=True,
-    )
-
-
-class DeleteStatementSegment(BaseSegment):
-    """A `DELETE` statement.
-
-    DEL[ETE] FROM <table name> [ WHERE <search condition> ]
-    """
-
-    type = "delete_statement"
-    # match grammar. This one makes sense in the context of knowing that it's
-    # definitely a statement, we just don't know what type yet.
-    match_grammar: Matchable = Sequence(
-        OneOf("DELETE", "DEL"),
-        Ref("FromClauseSegment"),
-        Ref("WhereClauseSegment", optional=True),
     )
 
 

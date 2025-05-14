@@ -1,0 +1,140 @@
+"""A List of Teradata SQL keywords.
+
+Teradata does not provide a complete list online, so this is pieced together
+from the documentation:
+
+https://docs.teradata.com/p/VantageCloud/Lake
+"""
+
+BTEQ_COMMAND_KEYWORDS = [
+    "EXIT",
+    "EXPORT",
+    "GOTO",
+    "HANG",
+    "IF",
+    "IMPORT",
+    "LABEL",
+    "OS",
+    "QUIT",
+    "REPEAT",
+    "RUN",
+    "SET",
+]
+
+BTEQ_SET_SESSION_CONTROL_KEYWORDS = [
+    "LOGMECH",
+    "LOGDATA",
+    "LOGMECH",
+    "LOGDATA",
+    "LOGOFF",
+    "LOGON",
+    "LOGONPROMPT",
+    "SESSIONS",
+    "SESSION CHARSET",
+    "SESSION RESPBUFLEN",
+    "SESSION TWORESPBUFS",
+    "TDP",
+]
+
+BTEQ_SET_SQL_CONTROL_KEYWORDS = [
+    "AUTOKEYRETRIEVE",
+    "COMPILE",
+    "DECIMALDIGITS",
+    "ENCRYPTION",
+    "INDICATORMODE",
+    "LARGEDATAMODE",
+    "PACK",
+    "RECORDLENGTH",
+    "RECORDMODE",
+    "RETRY",
+    "RETCANCEL",
+    "RETLIMIT",
+    "SESSION SQLFLAG",
+    "SESSION TRANSACTION",
+    "STATEMENTINDEPENDENCE",
+]
+
+BTEQ_SET_FILE_CONTROL_KEYWORDS = [
+    "ERROROUT",
+    "EXPORT",
+    "IMPORT",
+    "MESSAGEOUT",
+    "RUN",
+]
+
+BTEQ_SET_SEQUENCE_CONTROL_KEYWORDS = [
+    "=",
+    "EQUAL",
+    "ERRORLEVEL",
+    "SEVERITY",
+    "ERRORONDBSWARNING",
+    "EXIT",
+    "QUIT",
+    "EXITONDELAY",
+    "GOTO",
+    "HANG",
+    "IF",
+    "LABEL",
+    "MAXERROR",
+    "OS",
+    "REPEAT",
+    "REPEATSTOP",
+    "TSO",
+]
+
+BTEQ_SET_FORMAT_CONTROL_KEYWORDS = [
+    "DEFAULTS",
+    "SQL",
+    "EXPORTEJECT",
+    "FOLDLINE",
+    "FOOTING",
+    "FORMAT",
+    "FORMCHAR",
+    "FULLYEAR",
+    "HEADING",
+    "RTITLE",
+    "NULL",
+    "OMIT",
+    "PAGEBREAK",
+    "PAGELENGTH",
+    "REPORTALIGN",
+    "SEPARATOR",
+    "SIDETITLES",
+    "SKIPDOUBLE",
+    "SKIPLINE",
+    "SUPPRESS",
+    "TITLEDASHES",
+    "TRAILINGLINES",
+    "TRANSLATECTRLSTOSPACES",
+    "TRIMTRAILINGSPACES",
+    "UNDERLINE",
+    "WIDTH",
+]
+
+BTEQ_SET_DIAGNOSTICS_CONTROL_KEYWORDS = [
+    "COMMANDHISTORY",
+    "ECHOREQ",
+    "ECHOEXPANDEDREQ",
+    "HELP",
+    "NOTIFY",
+    "QUIET",
+    "REMARK",
+    "SHOW",
+    "SHOW CONTROLS",
+    "SHOW ERRORMAP",
+    "SHOW VERSIONS",
+    "TIMEMSG",
+    "TMSMMSG",
+]
+
+BTEQ_SET_CONTROL_KEYWORDS = (
+    BTEQ_SET_SESSION_CONTROL_KEYWORDS
+    + BTEQ_SET_SQL_CONTROL_KEYWORDS
+    + BTEQ_SET_FILE_CONTROL_KEYWORDS
+    + BTEQ_SET_SEQUENCE_CONTROL_KEYWORDS
+    + BTEQ_SET_FORMAT_CONTROL_KEYWORDS
+    + BTEQ_SET_DIAGNOSTICS_CONTROL_KEYWORDS
+)
+
+
+UNRESERVED_KEYWORDS = [] + BTEQ_COMMAND_KEYWORDS + BTEQ_SET_CONTROL_KEYWORDS

@@ -33,6 +33,11 @@ from sqlfluff.core.parser import (
     TypedParser,
 )
 from sqlfluff.dialects import dialect_ansi as ansi
+from sqlfluff.dialects.dialect_teradata_keywords import (
+    BTEQ_COMMAND_KEYWORDS,
+    BTEQ_SET_CONTROL_KEYWORDS,
+    UNRESERVED_KEYWORDS,
+)
 
 ansi_dialect = load_raw_dialect("ansi")
 teradata_dialect = ansi_dialect.copy_as(
@@ -110,6 +115,7 @@ teradata_dialect.sets("unreserved_keywords").update(
         "TITLEDASHES",
     ]
 )
+teradata_dialect.sets("unreserved_keywords").update(UNRESERVED_KEYWORDS)
 
 teradata_dialect.sets("reserved_keywords").update(
     ["LOCKING", "UNION", "REPLACE", "TIMESTAMP"]
@@ -157,6 +163,53 @@ teradata_dialect.add(
 )
 
 
+class BteqLabelStatementSegment(BaseSegment):
+    """BTEQ label.
+
+    Statement that labels what follows for reference by other BTEQ statements.
+
+    # BTEQ commands
+    .LABEL SIMPLEQUERY
+    SELECT 1;
+
+    .LABEL QUITONERROR
+    .IF ERRORCODE <> 0 THEN .QUIT ERRORCODE;
+    """
+
+    type = "bteq_label_statement"
+    match_grammar = Sequence(
+        Ref("DotSegment"),
+        "LABEL",
+        Ref("ObjectReferenceSegment"),
+        Ref("StatementSegment"),
+    )
+
+
+class BteqSetStatementSegment(BaseSegment):
+    """BTEQ Set Control Statement.
+
+    Statement that sets controls for different parts of BTEQ configuration.
+    https://docs.teradata.com/r/Enterprise_IntelliFlex_Lake_VMware/Basic-Teradata-Query-Reference-20.00/Introduction-to-BTEQ/Command-Set
+
+    # BTEQ commands
+    .set width 500;
+    .SET TITLEDASHES OFF;
+    """
+
+    type = "bteq_set_statement"
+    match_grammar = Sequence(
+        Ref("DotSegment"),
+        "SET",
+        AnyNumberOf(
+            Sequence(
+                OneOf(*BTEQ_SET_CONTROL_KEYWORDS),
+                OneOf(Ref("LiteralGrammar", optional=False), "ON", "OFF"),
+            ),
+            optional=False,
+        ),
+    )
+
+
 # BTEQ statement
 class BteqKeyWordSegment(BaseSegment):
     """Bteq Keywords.
@@ -173,7 +226,6 @@ class BteqKeyWordSegment(BaseSegment):
     LOGOFF - Logs off from database and terminates all sessions.
     IMPORT - Specifies the input file path.
     EXPORT - Specifies the output file path and initiates the export.
-
     """
 
     type = "bteq_key_word_segment"
@@ -186,7 +238,6 @@ class BteqKeyWordSegment(BaseSegment):
             "ACTIVITYCOUNT",
             "ERRORCODE",
             "DATABASE",
-            "LABEL",
             "GOTO",
             "LOGOFF",
             "IMPORT",
@@ -197,6 +248,7 @@ class BteqKeyWordSegment(BaseSegment):
             "SET",
             "WIDTH",
             "TITLEDASHES",
+            *BTEQ_COMMAND_KEYWORDS,
         ),
         Ref("LiteralGrammar", optional=True),
     )
@@ -213,16 +265,23 @@ class BteqStatementSegment(BaseSegment):
     """
 
     type = "bteq_statement"
-    match_grammar = Sequence(
-        Ref("DotSegment"),
-        Ref("BteqKeyWordSegment"),
-        AnyNumberOf(
+    match_grammar = OneOf(
+        Ref("BteqLabelStatementSegment"),
+        Ref("BteqSetStatementSegment"),
+        Sequence(
+            Ref("DotSegment"),
             Ref("BteqKeyWordSegment"),
-            # if ... then: the ...
-            Sequence(
-                Ref("ComparisonOperatorGrammar"), Ref("LiteralGrammar"), optional=True
+            AnyNumberOf(
+                Ref("BteqKeyWordSegment"),
+                # if ... then: the ...
+                Sequence(
+                    Ref("ComparisonOperatorGrammar"),
+                    Ref("LiteralGrammar"),
+                    optional=True,
+                ),
+                Ref("ObjectReferenceSegment"),
+                optional=True,
             ),
-            optional=True,
         ),
     )
 

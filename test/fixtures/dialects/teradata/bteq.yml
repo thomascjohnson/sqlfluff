@@ -3,7 +3,7 @@
 # computed by SQLFluff when running the tests. Please run
 # `python test/generate_parse_fixture_yml.py`  to generate them after adding or
 # altering SQL files.
-_hash: 6bde3e2a130f6ab829e3a30f00fea42ee20172d6813a87f1cabf632315578046
+_hash: 5275fdcef8867f8a5711f5de4ab7cbcbb0f5595ce11a65a4aef946f30b4e5fdb
 file:
 - statement:
     bteq_statement:
@@ -24,10 +24,66 @@ file:
 - statement_terminator: ;
 - statement:
     bteq_statement:
+      bteq_set_statement:
+      - dot: .
+      - keyword: set
+      - keyword: width
+      - numeric_literal: '500'
+- statement_terminator: ;
+- statement:
+    bteq_statement:
+      bteq_label_statement:
+        dot: .
+        keyword: LABEL
+        object_reference:
+          naked_identifier: SOMELABEL
+        statement:
+          select_statement:
+            select_clause:
+              keyword: SELECT
+              select_clause_element:
+                numeric_literal: '1'
+- statement_terminator: ;
+- statement:
+    bteq_statement:
+      bteq_set_statement:
+      - dot: .
+      - keyword: SET
+      - keyword: TITLEDASHES
+      - keyword: 'OFF'
+- statement_terminator: ;
+- statement:
+    bteq_statement:
     - dot: .
     - bteq_key_word_segment:
-        keyword: set
+        keyword: if
     - bteq_key_word_segment:
-        keyword: width
-        numeric_literal: '300'
+        keyword: activitycount
+    - comparison_operator:
+        raw_comparison_operator: <
+    - numeric_literal: '1'
+    - bteq_key_word_segment:
+        keyword: THEN
+    - bteq_key_word_segment:
+        dot: .
+        keyword: GOTO
+    - object_reference:
+        naked_identifier: SOMELABEL
+- statement_terminator: ;
+- statement:
+    bteq_statement:
+      dot: .
+      bteq_key_word_segment:
+        keyword: EXIT
+        numeric_literal: '0'
+- statement_terminator: ;
+- statement:
+    bteq_statement:
+      bteq_set_statement:
+      - dot: .
+      - keyword: SET
+      - keyword: ERRORLEVEL
+      - numeric_literal: '0'
+      - keyword: SEVERITY
+      - numeric_literal: '0'
 - statement_terminator: ;

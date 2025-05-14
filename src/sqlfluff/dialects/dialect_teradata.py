@@ -119,7 +119,7 @@ teradata_dialect.sets("unreserved_keywords").update(
 teradata_dialect.sets("unreserved_keywords").update(UNRESERVED_KEYWORDS)
 
 teradata_dialect.sets("reserved_keywords").update(
-    ["LOCK", "LOCKING", "UNION", "REPLACE", "TIMESTAMP"]
+    ["LOCK", "LOCKING", "UNION", "REPLACE", "TIMESTAMP", "SAMPLE"]
 )
 
 teradata_dialect.sets("bare_functions").update(["DATE"])
@@ -177,7 +177,7 @@ class SampleClauseSegment(BaseSegment):
     """
 
     type = "sample_clause"
-    match_grammer = Sequence("SAMPLE", Ref("NumericLiteralSegment"))
+    match_grammar = Sequence("SAMPLE", Ref("NumericLiteralSegment"))
 
 
 class BteqLabelStatementSegment(BaseSegment):
@@ -959,6 +959,8 @@ class SelectStatementSegment(ansi.SelectStatementSegment):
     match_grammar = ansi.SelectStatementSegment.match_grammar.copy(
         insert=[Ref("QualifyClauseSegment", optional=True)],
         before=Ref("OrderByClauseSegment", optional=True),
+    ).copy(
+        insert=[Ref("SampleClauseSegment", optional=True)],
     )
 
 

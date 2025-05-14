@@ -3,7 +3,7 @@
 # computed by SQLFluff when running the tests. Please run
 # `python test/generate_parse_fixture_yml.py`  to generate them after adding or
 # altering SQL files.
-_hash: f40f24d5a1a41b7eddb9aea823630d01de7387a10bd39f7c320a2b59162b2c24
+_hash: 8b663af19b527e5420335b860507029ffdc8223c7e276d7a9e9cba98180aff19
 file:
 - statement:
     select_statement:
@@ -611,4 +611,59 @@ file:
                     data_type_identifier: FORMAT
                   quoted_literal: "'+99'"
               - end_bracket: )
+- statement_terminator: ;
+- statement:
+    select_statement:
+      select_clause:
+        keyword: SELECT
+        select_clause_element:
+          wildcard_expression:
+            wildcard_identifier:
+              star: '*'
+      from_clause:
+        keyword: FROM
+        from_expression:
+          from_expression_element:
+            table_expression:
+              table_reference:
+                naked_identifier: x
+      sample_clause:
+        keyword: SAMPLE
+        numeric_literal: '100000'
+- statement_terminator: ;
+- statement:
+    select_statement:
+      select_clause:
+        keyword: SELECT
+        select_clause_element:
+          wildcard_expression:
+            wildcard_identifier:
+              star: '*'
+      from_clause:
+        keyword: FROM
+        from_expression:
+          from_expression_element:
+            table_expression:
+              table_reference:
+                naked_identifier: x
+      where_clause:
+        keyword: WHERE
+        expression:
+        - column_reference:
+            naked_identifier: a
+        - comparison_operator:
+            raw_comparison_operator: '>'
+        - column_reference:
+            naked_identifier: b
+        - binary_operator: AND
+        - column_reference:
+            naked_identifier: c
+        - comparison_operator:
+          - raw_comparison_operator: <
+          - raw_comparison_operator: '>'
+        - column_reference:
+            naked_identifier: d
+      sample_clause:
+        keyword: SAMPLE
+        numeric_literal: '100000'
 - statement_terminator: ;

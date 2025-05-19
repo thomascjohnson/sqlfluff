@@ -12,3 +12,5 @@ SELECT 1;
 .EXIT 0;
 
 .SET ERRORLEVEL 0 SEVERITY 0;
+
+.RUN FILE = /path/to/file.sql;

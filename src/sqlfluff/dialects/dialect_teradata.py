@@ -31,12 +31,14 @@ from sqlfluff.core.parser import (
     RegexLexer,
     Sequence,
     StringParser,
+    SymbolSegment,
     TypedParser,
 )
 from sqlfluff.dialects import dialect_ansi as ansi
 from sqlfluff.dialects.dialect_teradata_keywords import (
     BTEQ_COMMAND_KEYWORDS,
     BTEQ_SET_CONTROL_KEYWORDS,
+    BTEQ_STATUS_VALUE_KEYWORDS,
     UNRESERVED_KEYWORDS,
 )
 
@@ -166,6 +168,7 @@ teradata_dialect.add(
     NotEqualToSegment_a=StringParser("NE", ComparisonOperatorSegment),
     NotEqualToSegment_b=StringParser("NOT=", ComparisonOperatorSegment),
     NotEqualToSegment_c=StringParser("^=", ComparisonOperatorSegment),
+    BteqDotSegment=StringParser(".", SymbolSegment, type="bteq_dot"),
 )
 
 
@@ -178,6 +181,29 @@ class SampleClauseSegment(BaseSegment):
 
     type = "sample_clause"
     match_grammar = Sequence("SAMPLE", Ref("NumericLiteralSegment"))
+
+
+# BTEQ Statement Segments
+class BteqExitQuitStatementSegment(BaseSegment):
+    """BTEQ Exit or Quit Statement.
+
+    Statement that exits with a status code.
+
+    # BTEQ conditional examples
+    .if activitycount > 0 then .exit errorcode;
+    .EXIT 0;
+    """
+
+    type = "bteq_exit_statement"
+    match_grammar = Sequence(
+        Ref("BteqDotSegment"),
+        OneOf("EXIT", "QUIT"),
+        AnyNumberOf(
+            OneOf(*BTEQ_STATUS_VALUE_KEYWORDS),
+            Ref("NumericLiteralSegment"),
+            optional=True,
+        ),
+    )
 
 
 class BteqLabelStatementSegment(BaseSegment):
@@ -195,7 +221,7 @@ class BteqLabelStatementSegment(BaseSegment):
 
     type = "bteq_label_statement"
     match_grammar = Sequence(
-        Ref("DotSegment"),
+        Ref("BteqDotSegment"),
         "LABEL",
         Ref("ObjectReferenceSegment"),
         Ref("StatementSegment"),
@@ -215,7 +241,7 @@ class BteqSetStatementSegment(BaseSegment):
 
     type = "bteq_set_statement"
     match_grammar = Sequence(
-        Ref("DotSegment"),
+        Ref("BteqDotSegment"),
         "SET",
         AnyNumberOf(
             Sequence(
@@ -227,9 +253,49 @@ class BteqSetStatementSegment(BaseSegment):
     )
 
 
-# BTEQ statement
-class BteqKeyWordSegment(BaseSegment):
-    """Bteq Keywords.
+class BteqConditionalStatementSegment(BaseSegment):
+    """BTEQ Conditional Statement.
+
+    Statement that conditionally executes SQL or BTEQ code.
+
+    # BTEQ conditional examples
+    .if activitycount > 0 then .quit 1;
+    .IF errorcode <> 0 THEN DROP JOIN INDEX mydb.myindex ELSE .GOTO mylabel;
+    """
+
+    type = "bteq_conditional_statement"
+    match_grammar = Sequence(
+        Ref("BteqDotSegment"),
+        "IF",
+        Ref("ExpressionSegment"),
+        "THEN",
+        Ref("StatementSegment"),
+    )
+
+
+class BteqRunStatementSegment(BaseSegment):
+    """BTEQ Run Statement.
+
+    Statement that runs a file.
+
+    # BTEQ run examples
+    .RUN FILE=/my/file.sql;
+    """
+
+    type = "bteq_run_statement"
+    match_grammar = Sequence(
+        Ref("BteqDotSegment"),
+        "RUN",
+        "FILE",
+        Ref("EqualsSegment"),
+        Ref("PathSegment"),
+        Ref("DotSegment"),
+        Ref("WordSegment"),
+    )
+
+
+class BteqCommandKeywordSegment(BaseSegment):
+    """Bteq Command Keywords.
 
     Often a string with a dot, sometimes followed by a Literal
 
@@ -243,31 +309,23 @@ class BteqKeyWordSegment(BaseSegment):
     LOGOFF - Logs off from database and terminates all sessions.
     IMPORT - Specifies the input file path.
     EXPORT - Specifies the output file path and initiates the export.
+    SET - Set configuration, handled by BteqSetStatementSegment.
+    OS - Submit an operating system command to a workstation-attached system.
     """
 
     type = "bteq_key_word_segment"
+    match_grammar = OneOf(*BTEQ_COMMAND_KEYWORDS)
+
+
+class BteqCommandSegment(BaseSegment):
+    """Bteq command segment.
+
+    The command keyword preceded by a dot.
+    """
+
+    type = "bteq_command"
     match_grammar = Sequence(
-        Ref("DotSegment", optional=True),
-        OneOf(
-            "IF",
-            "THEN",
-            "LOGON",
-            "ACTIVITYCOUNT",
-            "ERRORCODE",
-            "DATABASE",
-            "GOTO",
-            "LOGOFF",
-            "IMPORT",
-            "EXPORT",
-            "RUN",
-            "QUIT",
-            "ACTIVITYCOUNT",
-            "SET",
-            "WIDTH",
-            "TITLEDASHES",
-            *BTEQ_COMMAND_KEYWORDS,
-        ),
-        Ref("LiteralGrammar", optional=True),
+        Ref("BteqDotSegment"), Ref("BteqCommandKeywordSegment"), allow_gaps=False
     )
 
 
@@ -285,17 +343,12 @@ class BteqStatementSegment(BaseSegment):
     match_grammar = OneOf(
         Ref("BteqLabelStatementSegment"),
         Ref("BteqSetStatementSegment"),
+        Ref("BteqExitQuitStatementSegment"),
+        Ref("BteqConditionalStatementSegment"),
+        Ref("BteqRunStatementSegment"),
         Sequence(
-            Ref("DotSegment"),
-            Ref("BteqKeyWordSegment"),
+            Ref("BteqCommandSegment"),
             AnyNumberOf(
-                Ref("BteqKeyWordSegment"),
-                # if ... then: the ...
-                Sequence(
-                    Ref("ComparisonOperatorGrammar"),
-                    Ref("LiteralGrammar"),
-                    optional=True,
-                ),
                 Ref("ObjectReferenceSegment"),
                 optional=True,
             ),
@@ -865,20 +918,22 @@ class StatementSegment(ansi.StatementSegment):
 
     type = "statement"
 
-    match_grammar = Sequence(
-        Ref("LockingClauseSegment", optional=True),
-        ansi.StatementSegment.match_grammar.copy(
-            insert=[
-                Ref("TdCollectStatisticsStatementSegment"),
-                Ref("BteqStatementSegment"),
-                Ref("TdRenameStatementSegment"),
-                Ref("QualifyClauseSegment"),
-                Ref("TdCommentStatementSegment"),
-                Ref("DatabaseStatementSegment"),
-                Ref("SetSessionStatementSegment"),
-                Ref("SetQueryBandStatementSegment"),
-            ],
+    match_grammar = OneOf(
+        Sequence(
+            Ref("LockingClauseSegment", optional=True),
+            ansi.StatementSegment.match_grammar.copy(
+                insert=[
+                    Ref("TdCollectStatisticsStatementSegment"),
+                    Ref("TdRenameStatementSegment"),
+                    Ref("QualifyClauseSegment"),
+                    Ref("TdCommentStatementSegment"),
+                    Ref("DatabaseStatementSegment"),
+                    Ref("SetSessionStatementSegment"),
+                    Ref("SetQueryBandStatementSegment"),
+                ],
+            ),
         ),
+        Ref("BteqStatementSegment"),
     )
 
 

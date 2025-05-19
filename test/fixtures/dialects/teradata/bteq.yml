@@ -3,29 +3,31 @@
 # computed by SQLFluff when running the tests. Please run
 # `python test/generate_parse_fixture_yml.py`  to generate them after adding or
 # altering SQL files.
-_hash: 5275fdcef8867f8a5711f5de4ab7cbcbb0f5595ce11a65a4aef946f30b4e5fdb
+_hash: ea28d19f8147a32444a102079eaba1bd97e3cd586f036c745e966bd7185ca43f
 file:
 - statement:
     bteq_statement:
-    - dot: .
-    - bteq_key_word_segment:
-        keyword: if
-    - bteq_key_word_segment:
-        keyword: errorcode
-    - comparison_operator:
-        raw_comparison_operator: '>'
-    - numeric_literal: '0'
-    - bteq_key_word_segment:
-        keyword: then
-    - bteq_key_word_segment:
-        dot: .
-        keyword: quit
-        numeric_literal: '4'
+      bteq_conditional_statement:
+      - bteq_dot: .
+      - keyword: if
+      - expression:
+          column_reference:
+            naked_identifier: errorcode
+          comparison_operator:
+            raw_comparison_operator: '>'
+          numeric_literal: '0'
+      - keyword: then
+      - statement:
+          bteq_statement:
+            bteq_exit_statement:
+              bteq_dot: .
+              keyword: quit
+              numeric_literal: '4'
 - statement_terminator: ;
 - statement:
     bteq_statement:
       bteq_set_statement:
-      - dot: .
+      - bteq_dot: .
       - keyword: set
       - keyword: width
       - numeric_literal: '500'
@@ -33,7 +35,7 @@ file:
 - statement:
     bteq_statement:
       bteq_label_statement:
-        dot: .
+        bteq_dot: .
         keyword: LABEL
         object_reference:
           naked_identifier: SOMELABEL
@@ -47,43 +49,64 @@ file:
 - statement:
     bteq_statement:
       bteq_set_statement:
-      - dot: .
+      - bteq_dot: .
       - keyword: SET
       - keyword: TITLEDASHES
       - keyword: 'OFF'
 - statement_terminator: ;
 - statement:
     bteq_statement:
-    - dot: .
-    - bteq_key_word_segment:
-        keyword: if
-    - bteq_key_word_segment:
-        keyword: activitycount
-    - comparison_operator:
-        raw_comparison_operator: <
-    - numeric_literal: '1'
-    - bteq_key_word_segment:
-        keyword: THEN
-    - bteq_key_word_segment:
-        dot: .
-        keyword: GOTO
-    - object_reference:
-        naked_identifier: SOMELABEL
+      bteq_conditional_statement:
+      - bteq_dot: .
+      - keyword: if
+      - expression:
+          column_reference:
+            naked_identifier: activitycount
+          comparison_operator:
+            raw_comparison_operator: <
+          numeric_literal: '1'
+      - keyword: THEN
+      - statement:
+          bteq_statement:
+            bteq_command:
+              bteq_dot: .
+              bteq_key_word_segment:
+                keyword: GOTO
+            object_reference:
+              naked_identifier: SOMELABEL
 - statement_terminator: ;
 - statement:
     bteq_statement:
-      dot: .
-      bteq_key_word_segment:
+      bteq_exit_statement:
+        bteq_dot: .
         keyword: EXIT
         numeric_literal: '0'
 - statement_terminator: ;
 - statement:
     bteq_statement:
       bteq_set_statement:
-      - dot: .
+      - bteq_dot: .
       - keyword: SET
       - keyword: ERRORLEVEL
       - numeric_literal: '0'
       - keyword: SEVERITY
       - numeric_literal: '0'
+- statement_terminator: ;
+- statement:
+    bteq_statement:
+      bteq_run_statement:
+      - bteq_dot: .
+      - keyword: RUN
+      - keyword: FILE
+      - comparison_operator:
+          raw_comparison_operator: '='
+      - path_segment:
+        - slash: /
+        - path_segment: path
+        - slash: /
+        - path_segment: to
+        - slash: /
+        - path_segment: file
+      - dot: .
+      - word: sql
 - statement_terminator: ;

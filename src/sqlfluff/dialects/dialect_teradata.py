@@ -398,7 +398,7 @@ class TdCollectStatisticsStatementSegment(BaseSegment):
 
     # TODO: add expression
     COLLECT [SUMMARY] (STATISTICS|STAT) [[COLUMN| [UNIQUE] INDEX]
-    (expression (, expression ...)] ON TABLENAME [[COLUMN] (expression, ,,,)]
+    (expression (, expression ...)] ON TABLENAME [[COLUMN] (expression, ...)]
     """
 
     type = "collect_statistics_statement"
@@ -462,7 +462,11 @@ class TdCollectStatisticsStatementSegment(BaseSegment):
                 Delimited(
                     OneOf(
                         Ref("ColumnReferenceSegment"),
+<<<<<<< HEAD
                         Ref.keyword("PARTITION"),
+=======
+                        "PARTITION",
+>>>>>>> a8c14d2b6 (Adds support for column list after table name in COLLECT STATISTICS (#6896))
                         # TODO: expression
                     ),
                 ),

@@ -462,11 +462,7 @@ class TdCollectStatisticsStatementSegment(BaseSegment):
                 Delimited(
                     OneOf(
                         Ref("ColumnReferenceSegment"),
-<<<<<<< HEAD
                         Ref.keyword("PARTITION"),
-=======
-                        "PARTITION",
->>>>>>> a8c14d2b6 (Adds support for column list after table name in COLLECT STATISTICS (#6896))
                         # TODO: expression
                     ),
                 ),
